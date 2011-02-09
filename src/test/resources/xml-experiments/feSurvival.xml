@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+
+<!-- $Revision: 1.1 $  $Date: 2004/12/06 20:16:33 $ -->
+
+<experiment name="Fe survival" date="2003-02-10">
+
+  <predicate category='species' value='Helicobacter pylori'/>
+  <predicate category='strain'  value='SS1'/>
+  <predicate category='perturbation' value='environmental:Fe:survival'/>
+
+  <link type="journalArticle" url="http://iai.asm.org/cgi/content/full/71/11/6510" />
+
+  <dataset status='primary' type='log 10 ratios'>
+    <uri> feSurvival.ratio </uri>
+  </dataset>
+
+  <constants>
+  </constants>
+
+  <condition alias='Log.iron.survival.000'>
+    <variable name='growthPhase' value='exponential'/>
+    <variable name='time' value='000' units='minutes' />
+  </condition>
+
+  <condition alias='Log.iron.survival.030'>
+    <variable name='growthPhase' value='exponential'/>
+    <variable name='time' value='030' units='minutes' />
+  </condition>
+
+  <condition alias='Log.iron.survival.060'>
+    <variable name='growthPhase' value='exponential'/>
+    <variable name='time' value='060' units='minutes' />
+  </condition>
+
+  <condition alias='Log.iron.survival.120'>
+    <variable name='growthPhase' value='exponential'/>
+    <variable name='time' value='120' units='minutes' />
+  </condition>
+
+  <condition alias='Stat.iron.survival.000'>
+    <variable name='growthPhase' value='static'/>
+    <variable name='time' value='000' units='minutes' />
+  </condition>
+
+  <condition alias='Stat.iron.survival.030'>
+    <variable name='growthPhase' value='static'/>
+    <variable name='time' value='030' units='minutes' />
+  </condition>
+
+  <condition alias='Stat.iron.survival.060'>
+    <variable name='growthPhase' value='static'/>
+    <variable name='time' value='060' units='minutes' />
+  </condition>
+
+  <condition alias='Stat.iron.survival.120'>
+    <variable name='growthPhase' value='static'/>
+    <variable name='time' value='120' units='minutes' />
+  </condition>
+
+ </experiment>

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+
+<!-- $Revision: 1.1 $  $Date: 2004/12/06 20:16:33 $ -->
+
+<experiment name="Fe add-back" date="2003-02-10">
+
+  <predicate category='species' value='Helicobacter pylori'/>
+  <predicate category='strain'  value='SS1'/>
+  <predicate category='perturbation' value='environmental:Fe:add-back'/>
+
+  <link type="journalArticle" url="http://iai.asm.org/cgi/content/full/71/11/6510" />
+
+  <dataset status='primary' type='log 10 ratios'>
+    <uri> feAddBack.ratio </uri>
+  </dataset>
+
+   <!-- $Revision: 1.1 $    $Date: 2004/12/06 20:17:21 $ -->
+
+  <constants>
+    <variable name='FeCl3 concentration' value='1.0' units='mM' />
+  </constants>
+
+  <condition alias='FeAddBack-1-0'>
+    <variable name='repetition' value='1' />
+    <variable name='time' value='000' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-1-30'>
+    <variable name='repetition' value='1' />
+    <variable name='time' value='030' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-1-60'>
+    <variable name='repetition' value='1' />
+    <variable name='time' value='060' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-1-120'>
+    <variable name='repetition' value='1' />
+    <variable name='time' value='120' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-2-0'>
+    <variable name='repetition' value='2' />
+    <variable name='time' value='000' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-2-30'>
+    <variable name='repetition' value='2' />
+    <variable name='time' value='030' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-2-60'>
+    <variable name='repetition' value='2' />
+    <variable name='time' value='060' units='minutes' />
+  </condition>
+
+  <condition alias='FeAddBack-2-120'>
+    <variable name='repetition' value='2' />
+    <variable name='time' value='120' units='minutes' />
+  </condition>
+
+
+ </experiment>
