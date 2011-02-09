@@ -1,3 +1,8 @@
 A utility library written in Scala which can be used in order to access
 all kinds of lab generated data from a Java based application.
 
+Supported formats:
+
+- SBEAMS
+- legacy ISB XML
+
