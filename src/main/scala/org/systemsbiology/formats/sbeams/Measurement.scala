@@ -1,19 +1,15 @@
 package org.systemsbiology.formats.sbeams
 
-/**
- * A measurement value, grouping ratio and lambda for a specific position in an
- * SBEAMS generated gene expression measurement.
- */
-case class MeasurementValue(ratio: Double, lambda: Double)
+import org.systemsbiology.formats.common._
 
 /**
  * Measurement is a convenience wrapper around an oligo map and a data matrix
  * to provide easy access to measurement values.
  */
-class Measurement(oligoMap: Map[String, String], dataMatrix: DataMatrix) {
+class Measurement(oligoMap: Map[String, String], dataMatrix: DataMatrix)
+extends GeneExpressionMeasurement {
 
   def conditions: Array[String] = dataMatrix.conditions
-
   def geneNames: Array[String]  = dataMatrix.geneNames
 
   def vngNames: Array[String] = {
@@ -27,8 +23,8 @@ class Measurement(oligoMap: Map[String, String], dataMatrix: DataMatrix) {
    * Allows to access the measurement values like in a two-dimensional
    * array, indexed by the data row and the condition index.
    */
-  def apply(row: Int, conditionIndex: Int): MeasurementValue = {
-    MeasurementValue(dataMatrix.ratioFor(row, conditionIndex),
-                     dataMatrix.lambdaFor(row, conditionIndex))
+  def apply(row: Int, conditionIndex: Int): GeneExpressionValue = {
+    GeneExpressionValue(dataMatrix.ratioFor(row, conditionIndex),
+                        dataMatrix.lambdaFor(row, conditionIndex))
   }
 }
