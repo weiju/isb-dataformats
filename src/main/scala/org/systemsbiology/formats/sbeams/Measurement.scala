@@ -6,7 +6,7 @@ import org.systemsbiology.formats.common._
  * Measurement is a convenience wrapper around an oligo map and a data matrix
  * to provide easy access to measurement values.
  */
-class Measurement(oligoMap: Map[String, String], dataMatrix: DataMatrix)
+class SbeamsMeasurement(oligoMap: Map[String, String], dataMatrix: DataMatrix)
 extends GeneExpressionMeasurement {
 
   def conditions: Array[String] = dataMatrix.conditions

@@ -21,7 +21,7 @@ object MeasurementSpec extends Specification {
       oligoMap = new OligoMapDatabase(new File(getClass.getResource("/sbeams/Slide_Templates").getFile)).latestMap
     }
     "create a Measurement" in {
-      val measurement = new Measurement(oligoMap, dataMatrix)
+      val measurement = new SbeamsMeasurement(oligoMap, dataMatrix)
       measurement.conditions must_== dataMatrix.conditions
       measurement.geneNames(0) must_== dataMatrix.geneNames(0)
       measurement(0, 0).ratio must_== dataMatrix.ratioFor(0, 0)

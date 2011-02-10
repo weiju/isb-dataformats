@@ -9,7 +9,7 @@ import org.systemsbiology.formats.common._
  * Each file contains a header and a number of data rows. Rows are of the format
  * <gene name><tab><field><tab><field><tab>....
  */
-case class MeasurementMatrix(conditions: Array[String], values: Array[Array[String]]) {
+case class LegacyMeasurementMatrix(conditions: Array[String], values: Array[Array[String]]) {
   def apply(geneIndex: Int, conditionIndex: Int): Double = {
     java.lang.Double.parseDouble(values(geneIndex)(conditionIndex + 1))
   }
@@ -20,7 +20,7 @@ case class MeasurementMatrix(conditions: Array[String], values: Array[Array[Stri
   }
 }
 
-case class Measurement(ratios: MeasurementMatrix, lambdas: MeasurementMatrix)
+case class LegacyMeasurement(ratios: LegacyMeasurementMatrix, lambdas: LegacyMeasurementMatrix)
 extends GeneExpressionMeasurement {
   def conditions = ratios.conditions
   def vngNames = ratios.vngNames
@@ -30,19 +30,19 @@ extends GeneExpressionMeasurement {
   }
 }
 
-object MeasurementReader {
+object LegacyMeasurementReader {
 
-  def readMeasurement(directory: File, baseName: String): Measurement = {
-    Measurement(readFile(new File(directory, baseName + ".ratio")),
-                readFile(new File(directory, baseName + ".lambda")))
+  def readMeasurement(directory: File, baseName: String): LegacyMeasurement = {
+    LegacyMeasurement(readFile(new File(directory, baseName + ".ratio")),
+                      readFile(new File(directory, baseName + ".lambda")))
   }
 
-  def readFile(file: File): MeasurementMatrix = {
+  def readFile(file: File): LegacyMeasurementMatrix = {
     val input = new BufferedReader(new FileReader(file))
     try {
       var line = input.readLine
       val conditionNames = line.split("\t").tail
-      MeasurementMatrix(conditionNames, readDataRows(input))
+      LegacyMeasurementMatrix(conditionNames, readDataRows(input))
     } finally {
       input.close
     }

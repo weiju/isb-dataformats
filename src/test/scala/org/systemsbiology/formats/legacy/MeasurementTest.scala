@@ -22,7 +22,7 @@ object MeasurementReaderSpec extends Specification {
       baseDirectory = new File(getClass.getResource("/legacy").getFile)
     }
     "read a ratio file" in {
-      val matrix = MeasurementReader.readFile(ratioFile)
+      val matrix = LegacyMeasurementReader.readFile(ratioFile)
       matrix.conditions.length must_== 3
       matrix.conditions(0) must_== "zn__0005um_vs_NRC-1"
       matrix.values.length must_== 2400
@@ -31,7 +31,7 @@ object MeasurementReaderSpec extends Specification {
       matrix.values(0)(1) must_== "0.013"
     }
     "read a measurement" in {
-      val measurement = MeasurementReader.readMeasurement(baseDirectory, "zinc")
+      val measurement = LegacyMeasurementReader.readMeasurement(baseDirectory, "zinc")
       measurement.conditions.length must_== 3
       measurement.conditions(0) must_== "zn__0005um_vs_NRC-1"
       measurement.vngNames.length must_== 2400
