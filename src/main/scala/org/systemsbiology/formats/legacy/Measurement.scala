@@ -20,10 +20,16 @@ case class LegacyMeasurementMatrix(conditions: Array[String], values: Array[Arra
   }
 }
 
-case class LegacyMeasurement(ratios: LegacyMeasurementMatrix, lambdas: LegacyMeasurementMatrix)
+case class LegacyMeasurement(oligoMap: Map[String, GeneNameEntry],
+                             ratios: LegacyMeasurementMatrix,
+                             lambdas: LegacyMeasurementMatrix)
 extends GeneExpressionMeasurement {
   def conditions = ratios.conditions
-  def vngNames = ratios.vngNames
+  def vngNames: Array[String] = ratios.vngNames
+  def geneNames: Array[String] = {
+    val vngNames = ratios.vngNames
+    vngNames.map(name => oligoMap(name).geneName).toArray
+  }
   
   def apply(geneIndex: Int, conditionIndex: Int): GeneExpressionValue = {
     GeneExpressionValue(ratios(geneIndex, conditionIndex), lambdas(geneIndex, conditionIndex))
@@ -32,8 +38,10 @@ extends GeneExpressionMeasurement {
 
 object LegacyMeasurementReader {
 
-  def readMeasurement(directory: File, baseName: String): LegacyMeasurement = {
-    LegacyMeasurement(readFile(new File(directory, baseName + ".ratio")),
+  def readMeasurement(directory: File, baseName: String,
+                      oligoMap: Map[String, GeneNameEntry]): LegacyMeasurement = {
+    LegacyMeasurement(oligoMap,
+                      readFile(new File(directory, baseName + ".ratio")),
                       readFile(new File(directory, baseName + ".lambda")))
   }
 

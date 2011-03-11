@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.sbeams
+package org.systemsbiology.formats.common
 
 import java.io._
 import java.util.Arrays
@@ -13,9 +13,13 @@ import scala.collection.mutable.HashMap
  * OligoMapDatabase accesses oligo map files in a designated directory.
  */
 object OligoMapDatabase {
-  val RefIndex = 4
-  val VngIndex = 10
+  val RefIndex      = 4
+  val GeneNameIndex = 9
+  val VngIndex      = 10
 }
+
+case class GeneNameEntry(vngName: String, geneName: String)
+
 class OligoMapDatabase(oligoMapDir: File) {
   import OligoMapDatabase._
 
@@ -40,14 +44,15 @@ class OligoMapDatabase(oligoMapDir: File) {
 
   def latestMap = {
     val input = new BufferedReader(new FileReader(latest))
-    val map = new HashMap[String, String]
+    val map = new HashMap[String, GeneNameEntry]
     try {
       var line = input.readLine // skip line 1
       while (line != null) {
         line = input.readLine
         if (line != null) {
           val fields = line.split("\t")
-          map(fields(RefIndex)) = fields(VngIndex)
+          map(fields(RefIndex)) = GeneNameEntry(vngName = fields(VngIndex),
+                                                geneName = fields(GeneNameIndex))
         }
       }
       map.toMap

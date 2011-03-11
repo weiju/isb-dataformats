@@ -1,22 +1,24 @@
 package org.systemsbiology.formats.sbeams
 
+import scala.collection.JavaConversions._
 import org.systemsbiology.formats.common._
 
 /**
  * Measurement is a convenience wrapper around an oligo map and a data matrix
  * to provide easy access to measurement values.
  */
-class SbeamsMeasurement(oligoMap: Map[String, String], dataMatrix: DataMatrix)
+class SbeamsMeasurement(oligoMap: Map[String, GeneNameEntry], dataMatrix: DataMatrix)
 extends GeneExpressionMeasurement {
 
   def conditions: Array[String] = dataMatrix.conditions
-  def geneNames: Array[String]  = dataMatrix.geneNames
 
   def vngNames: Array[String] = {
-    val orig = geneNames
-    val result = new Array[String](orig.length)
-    for (i <- 0 until result.length) result(i) = oligoMap(orig(i))
-    result
+    val orig = dataMatrix.geneNames
+    orig.map(name => oligoMap(name).vngName).toArray
+  }
+  def geneNames: Array[String] = {
+    val orig = dataMatrix.geneNames
+    orig.map(name => oligoMap(name).geneName).toArray
   }
   
   /**

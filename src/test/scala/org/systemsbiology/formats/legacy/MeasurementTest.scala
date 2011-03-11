@@ -5,6 +5,7 @@ package org.systemsbiology.formats.legacy
  */
 import org.specs._
 import org.specs.runner.{ConsoleRunner, JUnit4}
+import org.systemsbiology.formats.common._
 
 import java.io._
 
@@ -13,6 +14,7 @@ object MeasurementReaderSpecRunner extends ConsoleRunner(MeasurementReaderSpec)
 
 object MeasurementReaderSpec extends Specification {
 
+  var oligoMap: Map[String, GeneNameEntry] = null
   var ratioFile: File = null
   var baseDirectory: File = null
 
@@ -20,6 +22,7 @@ object MeasurementReaderSpec extends Specification {
     doBefore {
       ratioFile = new File(getClass.getResource("/legacy/zinc.ratio").getFile)
       baseDirectory = new File(getClass.getResource("/legacy").getFile)
+      oligoMap = new OligoMapDatabase(new File(getClass.getResource("/sbeams/Slide_Templates").getFile)).latestMap
     }
     "read a ratio file" in {
       val matrix = LegacyMeasurementReader.readFile(ratioFile)
@@ -31,7 +34,7 @@ object MeasurementReaderSpec extends Specification {
       matrix.values(0)(1) must_== "0.013"
     }
     "read a measurement" in {
-      val measurement = LegacyMeasurementReader.readMeasurement(baseDirectory, "zinc")
+      val measurement = LegacyMeasurementReader.readMeasurement(baseDirectory, "zinc", oligoMap)
       measurement.conditions.length must_== 3
       measurement.conditions(0) must_== "zn__0005um_vs_NRC-1"
       measurement.vngNames.length must_== 2400

@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.sbeams
+package org.systemsbiology.formats.common
 
 /**
  * Test cases for OligoMapDatabase
@@ -26,7 +26,7 @@ object OligoMapDatabaseSpec extends Specification {
     }
     "get the latest oligo map" in {
       val latestMap = new OligoMapDatabase(oligomapDir).latestMap
-      latestMap("HO01H19") must_== "VNG0475C"
+      latestMap("HO04N09") must_== GeneNameEntry("VNG1951G", "sub")
     }
   }
 }

@@ -7,12 +7,13 @@ import org.specs._
 import org.specs.runner.{ConsoleRunner, JUnit4}
 
 import java.io._
+import org.systemsbiology.formats.common._
 
 class MeasurementTest extends JUnit4(MeasurementSpec)
 object MeasurementSpecRunner extends ConsoleRunner(MeasurementSpec)
 
 object MeasurementSpec extends Specification {
-  var oligoMap: Map[String, String]     = null
+  var oligoMap: Map[String, GeneNameEntry]     = null
   var dataMatrix: DataMatrix = null
 
   "Measurement" should {
@@ -23,7 +24,7 @@ object MeasurementSpec extends Specification {
     "create a Measurement" in {
       val measurement = new SbeamsMeasurement(oligoMap, dataMatrix)
       measurement.conditions must_== dataMatrix.conditions
-      measurement.geneNames(0) must_== dataMatrix.geneNames(0)
+      measurement.geneNames(0) must_== "sub"
       measurement(0, 0).ratio must_== dataMatrix.ratioFor(0, 0)
       measurement(0, 0).lambda must_== dataMatrix.lambdaFor(0, 0)
       measurement.vngNames.length must_== dataMatrix.geneNames.length
