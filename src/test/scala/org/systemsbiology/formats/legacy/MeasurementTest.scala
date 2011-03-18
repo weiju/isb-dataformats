@@ -3,43 +3,37 @@ package org.systemsbiology.formats.legacy
 /**
  * Test cases for the legacy measurement reader.
  */
-import org.specs._
-import org.specs.runner.{ConsoleRunner, JUnit4}
+import org.scalatest.FlatSpec
+import org.scalatest.matchers.ShouldMatchers
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+
 import org.systemsbiology.formats.common._
 
 import java.io._
 
-class MeasurementReaderTest extends JUnit4(MeasurementReaderSpec)
-object MeasurementReaderSpecRunner extends ConsoleRunner(MeasurementReaderSpec)
+@RunWith(classOf[JUnitRunner])
+class MeasurementReaderSpec extends FlatSpec with ShouldMatchers {
 
-object MeasurementReaderSpec extends Specification {
+  val ratioFile = new File(getClass.getResource("/legacy/zinc.ratio").getFile)
+  val baseDirectory = new File(getClass.getResource("/legacy").getFile)
+  val oligoMap = new OligoMapDatabase(new File(getClass.getResource("/sbeams/Slide_Templates").getFile)).latestMap
 
-  var oligoMap: Map[String, GeneNameEntry] = null
-  var ratioFile: File = null
-  var baseDirectory: File = null
-
-  "ExperimentDirectory" should {
-    doBefore {
-      ratioFile = new File(getClass.getResource("/legacy/zinc.ratio").getFile)
-      baseDirectory = new File(getClass.getResource("/legacy").getFile)
-      oligoMap = new OligoMapDatabase(new File(getClass.getResource("/sbeams/Slide_Templates").getFile)).latestMap
-    }
-    "read a ratio file" in {
-      val matrix = LegacyMeasurementReader.readFile(ratioFile)
-      matrix.conditions.length must_== 3
-      matrix.conditions(0) must_== "zn__0005um_vs_NRC-1"
-      matrix.values.length must_== 2400
-      matrix.vngNames.length must_== 2400
-      matrix.values(0)(0) must_== "VNG6413H"
-      matrix.values(0)(1) must_== "0.013"
-    }
-    "read a measurement" in {
-      val measurement = LegacyMeasurementReader.readMeasurement(baseDirectory, "zinc", oligoMap)
-      measurement.conditions.length must_== 3
-      measurement.conditions(0) must_== "zn__0005um_vs_NRC-1"
-      measurement.vngNames.length must_== 2400
-      measurement(0, 0).lambda must beCloseTo(0.081, 0.0001)
-      measurement(0, 0).ratio must beCloseTo(0.013, 0.0001)
-    }
+  "ExperimentDirectory" should "read a ratio file" in {
+    val matrix = LegacyMeasurementReader.readFile(ratioFile)
+    matrix.conditions.length should be (3)
+    matrix.conditions(0)     should be ("zn__0005um_vs_NRC-1")
+    matrix.values.length     should be (2400)
+    matrix.vngNames.length   should be (2400)
+    matrix.values(0)(0)      should be ("VNG6413H")
+    matrix.values(0)(1)      should be ("0.013")
+  }
+  it should "read a measurement" in {
+    val measurement = LegacyMeasurementReader.readMeasurement(baseDirectory, "zinc", oligoMap)
+    measurement.conditions.length should be (3)
+    measurement.conditions(0)     should be ("zn__0005um_vs_NRC-1")
+    measurement.vngNames.length   should be (2400)
+    measurement(0, 0).lambda      should be (0.081 plusOrMinus 0.0001)
+    measurement(0, 0).ratio       should be (0.013 plusOrMinus 0.0001)
   }
 }
