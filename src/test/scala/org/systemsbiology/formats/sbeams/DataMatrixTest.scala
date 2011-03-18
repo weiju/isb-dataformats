@@ -17,7 +17,7 @@ class DataMatrixSpec extends FlatSpec with ShouldMatchers {
 
   "A DataMatrixReader" should "create a DataMatrix" in {
     val matrix = DataMatrixReader.createFromFile(matrixOutputFile)
-    matrix.headers.length   should equal (21)
+    matrix.headers.length   should equal (18)
     matrix.numDataRows      should equal (2400)
     matrix.numConditions    should equal (9)
     matrix.conditions(0)    should equal ("CU_-5_vs_NRC-1.sig")
@@ -30,7 +30,7 @@ class DataMatrixSpec extends FlatSpec with ShouldMatchers {
   it should "create a DataMatrix with selected genes" in {
     val matrix = DataMatrixReader.createFromFile(matrixOutputFile, Nil,
                                                  List("HO04E04", "HO06E22", "HO01G10"))
-    matrix.headers.length   should equal (21)
+    matrix.headers.length   should equal (18)
     matrix.numDataRows      should equal (3)
     matrix.numConditions    should equal (9)
     matrix.geneNames.length should equal (3)
@@ -39,5 +39,17 @@ class DataMatrixSpec extends FlatSpec with ShouldMatchers {
     matrix.geneNames(2)     should equal ("HO01G10")
     matrix.ratioFor(0, 0)   should be (-0.082 plusOrMinus 0.0001)
     matrix.lambdaFor(0, 0)  should be (23.430 plusOrMinus 0.0001)
+  }
+  it should "create a DataMatrix with selected conditions" in {
+    val matrix = DataMatrixReader.createFromFile(matrixOutputFile,
+                                                 List("CU_0_vs_NRC-1.sig", "Cu_20_vs_NRC-1.sig",
+                                                      "Cu_80_vs_NRC-1.sig"),
+                                                 Nil)
+    matrix.headers.length   should equal (6)
+    matrix.numDataRows      should equal (2400)
+    matrix.numConditions    should equal (3)
+    matrix.geneNames.length should equal (2400)
+    matrix.ratioFor(0, 0)   should be (-0.002 plusOrMinus 0.0001)
+    matrix.lambdaFor(0, 0)  should be (0.008 plusOrMinus 0.0001)
   }
 }
