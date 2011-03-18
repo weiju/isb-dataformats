@@ -21,7 +21,6 @@ object DataMatrixSpec extends Specification {
     }
     "create a DataMatrix" in {
       val matrix = DataMatrixReader.createFromFile(matrixOutputFile)
-      matrix must notBeNull
       matrix.headers.length must_== 21
       matrix.numDataRows must_== 2400
       matrix.numConditions must_== 9
@@ -32,5 +31,33 @@ object DataMatrixSpec extends Specification {
       matrix.ratioFor(0, 0) must beCloseTo(0.026, 0.0001)
       matrix.lambdaFor(0, 0) must beCloseTo(2.103, 0.0001)
     }
+    "create a DataMatrix with selected genes" in {
+      val matrix = DataMatrixReader.createFromFile(matrixOutputFile, Nil,
+                                                   List("HO04E04", "HO06E22", "HO01G10"))
+      matrix.headers.length must_== 21
+      matrix.numDataRows must_== 3
+      matrix.numConditions must_== 9
+      matrix.geneNames.length must_== 3
+      matrix.geneNames(0) must_== "HO04E04"
+      matrix.geneNames(1) must_== "HO06E22"
+      matrix.geneNames(2) must_== "HO01G10"
+      matrix.ratioFor(0, 0) must beCloseTo(-0.082, 0.0001)
+      matrix.lambdaFor(0, 0) must beCloseTo(23.430, 0.0001)
+    }
+/*
+    "create a DataMatrix with selected conditions" in {
+      val matrix = DataMatrixReader.createFromFile(matrixOutputFile,
+                                                   Nil,
+                                                   Nil)
+      matrix.headers.length must_== 21
+      matrix.numDataRows must_== 3
+      matrix.numConditions must_== 9
+      matrix.geneNames.length must_== 3
+      matrix.geneNames(0) must_== "HO04E04"
+      matrix.geneNames(1) must_== "HO06E22"
+      matrix.geneNames(2) must_== "HO01G10"
+      matrix.ratioFor(0, 0) must beCloseTo(-0.082, 0.0001)
+      matrix.lambdaFor(0, 0) must beCloseTo(23.430, 0.0001)
+    }*/
   }
 }
