@@ -13,7 +13,7 @@ class MeasurementMergeException extends Exception
  * @constructor creates a merger instance
  * @param measurements the list of measurements to be merged
  */
-class GeneExpressionMeasurementMerger(measurements: List[GeneExpressionMeasurement]) {
+case class GeneExpressionMeasurementMerger(measurements: List[GeneExpressionMeasurement]) {
 
   /**
    * Returns a GeneExpressionMeasurement which represents the merge
