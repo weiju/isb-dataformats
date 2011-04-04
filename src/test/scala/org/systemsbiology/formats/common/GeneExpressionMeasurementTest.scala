@@ -1,7 +1,7 @@
 package org.systemsbiology.formats.common
 
 /**
- * Test cases for OligoMapDatabase
+ * Test cases for MutableGeneExpressionMeasurement.
  */
 import org.scalatest.{FlatSpec,BeforeAndAfterEach}
 import org.scalatest.matchers.ShouldMatchers
