@@ -14,6 +14,8 @@ import org.systemsbiology.formats.common._
 @RunWith(classOf[JUnitRunner])
 class MeasurementSpec extends FlatSpec with ShouldMatchers {
   val dataMatrix = DataMatrixReader.createFromFile(new File(getClass.getResource("/sbeams/matrix_output").getFile))
+  val dataMatrixUnmapped =
+    DataMatrixReader.createFromFile(new File(getClass.getResource("/sbeams/matrix_output_unmappedgenes").getFile))
   val oligoMap = new OligoMapDatabase(new File(getClass.getResource("/sbeams/Slide_Templates").getFile)).latestMap
 
   "A Measurement" should "create a Measurement" in {
@@ -24,5 +26,10 @@ class MeasurementSpec extends FlatSpec with ShouldMatchers {
     measurement(0, 0).lambda should equal (dataMatrix.lambdaFor(0, 0))
     measurement.vngNames.length should equal (dataMatrix.geneNames.length)
     measurement.vngNames(0) should equal ("VNG1951G")
+  }
+  it should "not replace VNG names" in {
+    val measurement = new SbeamsMeasurement(oligoMap, dataMatrixUnmapped)
+    measurement.geneNames(0) should equal ("undefined")
+    measurement.vngNames(0) should equal ("undefined")
   }
 }

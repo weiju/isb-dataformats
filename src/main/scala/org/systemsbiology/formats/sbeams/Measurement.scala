@@ -14,11 +14,15 @@ extends GeneExpressionMeasurement {
 
   def vngNames: Array[String] = {
     val orig = dataMatrix.geneNames
-    orig.map(name => oligoMap(name).vngName).toArray
+    orig.map(name => {
+      if (oligoMap.contains(name)) oligoMap(name).vngName else name
+    }).toArray
   }
   def geneNames: Array[String] = {
     val orig = dataMatrix.geneNames
-    orig.map(name => oligoMap(name).geneName).toArray
+    orig.map(name => {
+      if (oligoMap.contains(name)) oligoMap(name).geneName else name
+    }).toArray
   }
   
   /**
