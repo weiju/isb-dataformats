@@ -24,4 +24,8 @@ class OligoMapDatabaseSpec extends FlatSpec with ShouldMatchers {
     val latestMap = new OligoMapDatabase(oligomapDir).latestMap
     latestMap("HO04N09") should equal (GeneNameEntry("VNG1951G", "sub"))
   }
+  it should "get the latest mapping from VNG to gene names" in {
+    val latestVngMap = new OligoMapDatabase(oligomapDir).latestVng2GeneNameMap
+    latestVngMap("VNG1951G") should be ("sub")
+  }
 }

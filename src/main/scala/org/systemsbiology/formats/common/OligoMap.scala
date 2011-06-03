@@ -42,6 +42,9 @@ class OligoMapDatabase(oligoMapDir: File) {
 
   private def mapFiles = oligoMapDir.listFiles.filter(file => file.getName.matches("halo_oligo_.*.map"))
 
+  /**
+   * Provides mapping from a SBEAMS gene name to VNG and gene function name.
+   */
   def latestMap = {
     val input = new BufferedReader(new FileReader(latest))
     val map = new HashMap[String, GeneNameEntry]
@@ -53,6 +56,26 @@ class OligoMapDatabase(oligoMapDir: File) {
           val fields = line.split("\t")
           map(fields(RefIndex)) = GeneNameEntry(vngName = fields(VngIndex),
                                                 geneName = fields(GeneNameIndex))
+        }
+      }
+      map.toMap
+    } finally {
+      input.close
+    }
+  }
+  /**
+   * Provides a mapping from a VNG name to gene functional name.
+   */
+  def latestVng2GeneNameMap = {
+    val input = new BufferedReader(new FileReader(latest))
+    val map = new HashMap[String, String]
+    try {
+      var line = input.readLine // skip line 1
+      while (line != null) {
+        line = input.readLine
+        if (line != null) {
+          val fields = line.split("\t")
+          map(fields(VngIndex)) = fields(GeneNameIndex)
         }
       }
       map.toMap
