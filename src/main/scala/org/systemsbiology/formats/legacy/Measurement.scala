@@ -28,7 +28,9 @@ extends GeneExpressionMeasurement {
   def vngNames: Array[String] = ratios.vngNames
   def geneNames: Array[String] = {
     val vngNames = ratios.vngNames
-    vngNames.map(name => oligoMap(name).geneName).toArray
+    vngNames.map(name => {
+      if (oligoMap.contains(name)) oligoMap(name).geneName else name
+    }).toArray
   }
   
   def apply(geneIndex: Int, conditionIndex: Int): GeneExpressionValue = {
@@ -46,23 +48,31 @@ object LegacyMeasurementReader {
   }
 
   def readFile(file: File): LegacyMeasurementMatrix = {
+    println("reading: " + file.getName)
     val input = new BufferedReader(new FileReader(file))
     try {
       var line = input.readLine
       val conditionNames = line.split("\t").tail
-      LegacyMeasurementMatrix(conditionNames, readDataRows(input))
+      LegacyMeasurementMatrix(conditionNames, readDataRows(input, conditionNames.length))
     } finally {
       input.close
     }
   }
 
-  private def readDataRows(input: BufferedReader) = {
+  private def readDataRows(input: BufferedReader, numConditions: Int) = {
     var dataRows : List[Array[String]] = Nil
     var line = ""
+    var currentLine = 2
     while (line != null) {
       line = input.readLine
+      currentLine += 1
       if (line != null) {
-        dataRows ::= line.split("\t")
+        val dataRow = line.trim.split("\t")
+        if (dataRow.length == (numConditions + 1)) dataRows ::= dataRow
+        else {
+          println("WARNING ROW ONLY CONTAINS:")
+          dataRow.foreach(elem => printf("'%s'\n", elem))
+        }
       }
     }
     dataRows.reverse.toArray
