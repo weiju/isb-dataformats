@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.common
+package org.systemsbiology.formats.microarray.common
 
 /**
  * A measurement value, grouping ratio and lambda for a specific position in an

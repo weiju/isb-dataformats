@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.sbeams
+package org.systemsbiology.formats.microarray.sbeams
 
 /**
  * Test cases for the Measurement class.
@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 import java.io._
-import org.systemsbiology.formats.common._
+import org.systemsbiology.formats.microarray.common._
 
 @RunWith(classOf[JUnitRunner])
 class MeasurementSpec extends FlatSpec with ShouldMatchers {

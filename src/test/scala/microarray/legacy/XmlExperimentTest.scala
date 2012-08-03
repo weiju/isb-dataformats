@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.legacy
+package org.systemsbiology.formats.microarray.legacy
 
 /**
  * Test cases for XML experiments.

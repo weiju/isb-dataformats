@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.common
+package org.systemsbiology.formats.microarray.common
 
 /**
  * An Exception that is thrown when a list of measurements could not be merged.

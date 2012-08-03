@@ -1,7 +1,7 @@
-package org.systemsbiology.formats.sbeams
+package org.systemsbiology.formats.microarray.sbeams
 
 import scala.collection.JavaConversions._
-import org.systemsbiology.formats.common._
+import org.systemsbiology.formats.microarray.common._
 
 /**
  * Measurement is a convenience wrapper around an oligo map and a data matrix

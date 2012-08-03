@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.legacy
+package org.systemsbiology.formats.microarray.legacy
 
 /**
  * Test cases for the legacy measurement reader.
@@ -8,7 +8,7 @@ import org.scalatest.matchers.ShouldMatchers
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
-import org.systemsbiology.formats.common._
+import org.systemsbiology.formats.microarray.common._
 
 import java.io._
 

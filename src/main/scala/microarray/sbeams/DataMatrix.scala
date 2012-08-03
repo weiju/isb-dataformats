@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.sbeams
+package org.systemsbiology.formats.microarray.sbeams
 
 import java.io._
 import scala.collection.JavaConversions

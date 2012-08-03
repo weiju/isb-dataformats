@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.legacy
+package org.systemsbiology.formats.microarray.legacy
 
 import java.io._
 import scala.xml._

@@ -1,8 +1,8 @@
-package org.systemsbiology.formats.legacy
+package org.systemsbiology.formats.microarray.legacy
 
 import java.io._
 import scala.collection.JavaConversions
-import org.systemsbiology.formats.common._
+import org.systemsbiology.formats.microarray.common._
 
 /*
  * ISB legacy measurement data files are of the form <name>.{lambda|ratio}.

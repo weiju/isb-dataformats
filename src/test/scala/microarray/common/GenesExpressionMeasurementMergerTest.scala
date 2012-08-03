@@ -1,4 +1,4 @@
-package org.systemsbiology.formats.common
+package org.systemsbiology.formats.microarray.common
 
 /**
  * Test cases for MutableGeneExpressionMeasurementMerger.
