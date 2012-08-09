@@ -119,7 +119,7 @@ object SOFTReader {
         try {
           array(row)(col) = value.value.toDouble
         } catch {
-          case _ => array(row)(col) = java.lang.Double.NaN
+          case _: Throwable => array(row)(col) = java.lang.Double.NaN
         }
       }
     }
