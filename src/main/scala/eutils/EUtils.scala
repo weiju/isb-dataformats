@@ -137,6 +137,6 @@ object Main extends App {
   }
   */
   val in = new BufferedReader(new FileReader("/home/weiju/Projects/ISB/isb-dataformats/src/test/resources/rsat/Halobacterium_sp_feature_names"))
-  val rsatReader = new RSATReader(in)
+  val rsatReader = new RSATSynonymReader(in)
   in.close
 }
