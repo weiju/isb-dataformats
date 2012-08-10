@@ -15,5 +15,6 @@ class RSATSynonymReaderSpec extends FlatSpec with ShouldMatchers {
     val synonyms = new RSATSynonymReader(reader).synonyms
     synonyms.size should be > (0)
     synonyms("trn45") should be ("VNGt45")
+    reader.close
   }
 }

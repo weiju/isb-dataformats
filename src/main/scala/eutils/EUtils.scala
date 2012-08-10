@@ -97,7 +97,6 @@ object Main extends App {
     val searchresult = ESearch.get(GEO.DataSets, query)
     val webEnv = (searchresult \ "WebEnv").text
     val queryKey = (searchresult \ "QueryKey").text
-    //val ids = (searchresult \ "IdList" \ "Id").map(node => node.text)
     ESummary.getFromPreviousSearch(GEO.DataSets,
                                    webEnv, queryKey)
   }
@@ -122,7 +121,7 @@ object Main extends App {
     }.map { item => item.text.split(";") }.flatten.toSet.toSeq
   }
   
-  //println(getPlatforms("synechococcus").map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a)))
+  println(getPlatforms("synechococcus").map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a)))
   //println(getSampleAccessions("synechococcus").map(a => GEOFTPURLBuilder.urlBySample(a)))
   /*
   val matrix = SOFTReader.read(
@@ -136,7 +135,4 @@ object Main extends App {
     printf("\n")
   }
   */
-  val in = new BufferedReader(new FileReader("/home/weiju/Projects/ISB/isb-dataformats/src/test/resources/rsat/Halobacterium_sp_feature_names"))
-  val rsatReader = new RSATSynonymReader(in)
-  in.close
 }
