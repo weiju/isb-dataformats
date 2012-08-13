@@ -2,7 +2,8 @@ package org.systemsbiology.services.eutils
 
 import scala.xml._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
-import java.io.{InputStreamReader, BufferedReader, File, FileReader}
+import java.io.{InputStreamReader, BufferedReader, File, FileReader, FileInputStream}
+import java.util.zip._
 import java.util.regex.Pattern
 
 import org.systemsbiology.formats.microarray.soft._
@@ -121,18 +122,37 @@ object Main extends App {
     }.map { item => item.text.split(";") }.flatten.toSet.toSeq
   }
   
-  println(getPlatforms("synechococcus").map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a)))
-  //println(getSampleAccessions("synechococcus").map(a => GEOFTPURLBuilder.urlBySample(a)))
-  /*
-  val matrix = SOFTReader.read(
-    new File("/home/weiju/Downloads/GPL7448_family.soft"))
-  printf("ORF\t%s\n", matrix.sampleNames.mkString("\t"))
-  for (row <- 0 until matrix.numRows) {
-    print(matrix.rowNames(row))
-    for (col <- 0 until matrix.numColumns) {
-      printf("\t%f", matrix.values(row)(col))
+  val query = "synechococcus+elongatus+7942"
+  val urls = getPlatforms(query).map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a))
+  println("\n\n----------------------\nFTP URLS: ")
+
+  urls.foreach { url =>
+    val file = SOFTReader.download(url, new File("cache"))
+    var gzip: BufferedReader = null
+    try {
+      gzip = new BufferedReader(
+        new InputStreamReader(new GZIPInputStream(new FileInputStream(file))))
+      val matrix = SOFTReader.read(gzip, "7942_ID")
+    } catch {
+      case e:Throwable =>
+        printf("ERROR in processing - skipping file '%s'\n", file.getName)
+        e.printStackTrace
+    } finally {
+      if (gzip != null) gzip.close
     }
-    printf("\n")
+/*
+    printf("GENE\t%s\n", matrix.sampleNames.mkString("\t"))
+    for (row <- 0 until matrix.numRows) {
+      print(matrix.rowNames(row))
+      for (col <- 0 until matrix.numColumns) {
+        printf("\t%f", matrix.values(row)(col))
+      }
+      printf("\n")
+    }*/
   }
-  */
+  //println(getSampleAccessions(query).map(a => GEOFTPURLBuilder.urlBySample(a)))
+  /*
+  val synonyms = new RSATSynonymReader(new BufferedReader(
+    new FileReader("/home/weiju/Projects/ISB/isb-dataformats/synf_feature_names.tab"))).synonyms
+    */
 }

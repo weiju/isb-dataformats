@@ -18,4 +18,13 @@ class EUtilsSpec extends FlatSpec with ShouldMatchers {
     (searchresult \ "WebEnv").text.length should be > (0)
     (searchresult \ "QueryKey").text.length should be > (0)
   }
+  "ESummary" should "deliver a result for querying synechococcus using previous" in {
+    val searchresult = ESearch.get(GEO.DataSets, "synechococcus")
+    val ids = (searchresult \ "IdList" \ "Id").map(node => node.text)
+    val webEnv = (searchresult \ "WebEnv").text
+    val queryKey = (searchresult \ "QueryKey").text
+    val result = ESummary.getFromPreviousSearch(GEO.DataSets,
+                                                webEnv, queryKey)
+    (result \\ "Item").length should be > (0)
+  }
 }

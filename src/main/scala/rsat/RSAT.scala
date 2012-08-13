@@ -3,6 +3,10 @@ package org.systemsbiology.services.rsat
 import java.io.{BufferedReader}
 import scala.collection.mutable.HashMap
 
+object RSATService {
+  val RSAT_BASE_URL = "http://rsat.ccb.sickkids.ca"
+  val DIR_PATH = "data/genomes" // the URL path that holds the organism directory
+}
 
 class RSATSynonymReader(reader: BufferedReader) {
   val synonyms = readSynonyms
