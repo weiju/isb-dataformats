@@ -2,13 +2,13 @@ package org.systemsbiology.geoimport
 
 import java.io.{File, BufferedReader, InputStreamReader, FileInputStream, FileReader}
 import java.util.zip._
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, HashSet}
 
 import org.systemsbiology.services.eutils._
 import org.systemsbiology.services.rsat._
 import org.systemsbiology.formats.microarray.soft._
 
-case class ImportConfig(query: String, idColumn: String)
+case class ImportConfig(query: String, idColumns: Seq[String])
 
 object GeoImport extends App {
   def getSummaries(query: String) = {
@@ -34,15 +34,15 @@ object GeoImport extends App {
   def mergeOrganism(config: ImportConfig) {
     val urls = getPlatforms(config.query).map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a))
     val matrices = new ArrayBuffer[DataMatrix]
-    //val synonyms = new RSATSynonymReader(new BufferedReader(
-    //  new FileReader("/home/weiju/Projects/ISB/isb-dataformats/synf_feature_names.tab"))).synonyms
+    val synonyms = new RSATSynonymReader(new BufferedReader(
+      new FileReader("/home/weiju/Projects/ISB/isb-dataformats/synf_feature_names.tab"))).synonyms
     urls.foreach { url =>
       val file = SOFTReader.download(url, new File("cache"))
       var gzip: BufferedReader = null
       try {
         gzip = new BufferedReader(
           new InputStreamReader(new GZIPInputStream(new FileInputStream(file))))
-        val matrix = SOFTReader.read(gzip, config.idColumn)
+        val matrix = SOFTReader.read(gzip, config.idColumns)
         if (matrix != null) matrices += matrix
       } catch {
         case e:Throwable =>
@@ -54,6 +54,21 @@ object GeoImport extends App {
     }
     println("# MATRICES COLLECTED: " + matrices.length)
 /*
+    val allGenes = new HashSet[String]
+    val allConditions = new ArrayBuffer[String]
+    matrices.foreach { matrix =>
+      //allGenes ++= matrix.rowNames
+      //allConditions ++= matrix.sampleNames
+    }
+    matrices(1).rowNames.foreach { row =>
+      if (allGenes.contains(row)) {
+        printf("GENE '%s' is ALREADY IN !!!!\n", row)
+      }
+      allGenes += row
+    }
+    printf("# genes: %d # conditions: %d\n", allGenes.size, allConditions.size)
+*/
+/*
     printf("GENE\t%s\n", matrix.sampleNames.mkString("\t"))
     for (row <- 0 until matrix.numRows) {
       print(matrix.rowNames(row))
@@ -63,6 +78,6 @@ object GeoImport extends App {
       printf("\n")
     }*/
   }
-  val configs = List(ImportConfig("synechococcus+elongatus+7942", "7942_ID"))
+  val configs = List(ImportConfig("synechococcus+elongatus+7942", List("7942_ID", "ORF")))
   configs.foreach { config => mergeOrganism(config) }
 }

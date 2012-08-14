@@ -21,7 +21,7 @@ case class DataMatrix(rowNames: Seq[String],
 
 object SOFTReader {
   private def readPlatform(platformLine: String, in: BufferedReader,
-                           geneColumnName: String): Platform = {
+                           geneColumnNames: Seq[String]): Platform = {
     val geneMap = new HashMap[String, String]
     val id2RowMap = new HashMap[String, Int]
     val ids = new ArrayBuffer[String]
@@ -35,8 +35,20 @@ object SOFTReader {
     line = in.readLine // read the header
     val header = line.split("\t").toSeq
     val idCol = header.indexOf("ID")
-    var geneCol = header.indexOf(geneColumnName)
+
+    // Filter the gene column according to the priority list
+    var geneCol = -1
+    var geneColIndex = 0
+    var continueLoop = geneColIndex < geneColumnNames.length
+    while (continueLoop) {
+      val geneColumnName = geneColumnNames(geneColIndex)
+      geneCol = header.indexOf(geneColumnName)
+      geneColIndex += 1
+      continueLoop = geneCol < 0 && geneColIndex < geneColumnNames.length
+    }
     if (geneCol == -1) geneCol = header.indexOf("ORF") // default is ORF
+
+
     if (idCol == -1) {
       println("ERROR: could not find a ID column")
       return null
@@ -80,13 +92,13 @@ object SOFTReader {
     }
     SampleData(sampleName, values)
   }
-  def read(in: BufferedReader, geneColumnName: String="ORF") = {
+  def read(in: BufferedReader, geneColumnNames: Seq[String]=List("ORF")) = {
     val platforms = new ArrayBuffer[Platform]
     val samples = new ArrayBuffer[SampleData]
     var line = in.readLine
     while (line != null) {
       if (line.startsWith("^PLATFORM")) {
-        val platform = readPlatform(line, in, geneColumnName)
+        val platform = readPlatform(line, in, geneColumnNames)
         if (platform != null) platforms += platform
       }
       if (line.startsWith("^SAMPLE")) {
@@ -103,12 +115,15 @@ object SOFTReader {
       for (col <- 0 until samples.length) {
         samples(col).values.foreach { value =>
           val row = platform.id2RowMap(value.idref)
-                                     try {
-                                       array(row)(col) = value.value.toDouble
-                                     } catch {
-                                       case _: Throwable => array(row)(col) = java.lang.Double.NaN
-                                     }
-                                   }
+          try {
+            array(row)(col) = value.value.toDouble
+          } catch {
+            case _: Throwable => array(row)(col) = java.lang.Double.NaN
+          }
+        }
+      }
+      platform.ids.foreach { id =>
+        if (platform.geneMap(id) == "") println("WARNING: MAPS TO NOTHING: " + id)
       }
       DataMatrix(platform.ids.map{id => platform.geneMap(id) },
                  samples.map(_.name),
