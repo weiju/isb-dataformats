@@ -2,8 +2,7 @@ package org.systemsbiology.services.eutils
 
 import scala.xml._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
-import java.io.{InputStreamReader, BufferedReader, File, FileReader, FileInputStream}
-import java.util.zip._
+import java.io.{BufferedReader, FileReader, InputStreamReader}
 import java.util.regex.Pattern
 
 import org.systemsbiology.formats.microarray.soft._
@@ -92,67 +91,26 @@ object EFetch {
   }
 }
 
-object Main extends App {
+// Helper object for building FTP URLs
+object GEOFTPURLBuilder {
+  val BaseURL = "ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA"
+  val GSMPattern = Pattern.compile("GSM\\d{3,}?")
+  def download {}
 
-  def getSummaries(query: String) = {
-    val searchresult = ESearch.get(GEO.DataSets, query)
-    val webEnv = (searchresult \ "WebEnv").text
-    val queryKey = (searchresult \ "QueryKey").text
-    ESummary.getFromPreviousSearch(GEO.DataSets,
-                                   webEnv, queryKey)
+  // Create an FTP url for a sample accession
+  def urlBySample(accession: String) = {
+    val matcher = GSMPattern.matcher(accession)
+    if (matcher.matches) {
+      val dir = accession.replaceFirst("\\d\\d\\d$", "nnn")
+      val filename = "%s.CEL.gz".format(accession)
+      List(BaseURL, "supplementary", "samples", dir, accession,
+           filename).mkString("/")
+    } else throw new IllegalArgumentException("accession '%s' does not match GSM format".format(accession))
   }
 
-  def getSampleAccessions(organism: String) = {
-    val query = "%s+AND+cel[suppFile]".format(organism)
-    val summary = getSummaries(query)
-    (summary \\ "Item").filter {
-      item => (item \ "@Name").text == "Accession"
-    }.map { item => item.text }
+  def urlSOFTByPlatform(platform: String) = {
+    val gpl = "GPL" + platform
+    List(BaseURL, "SOFT", "by_platform", gpl,
+         gpl + "_family.soft.gz").mkString("/")
   }
-
-  /**
-   * Returns the unique platform identifiers available for this
-   * organism.
-   */
-  def getPlatforms(organism: String) = {
-    val query = "%s".format(organism)
-    val summary = getSummaries(organism)
-    (summary \\ "Item").filter {
-      item => (item \ "@Name").text == "GPL"
-    }.map { item => item.text.split(";") }.flatten.toSet.toSeq
-  }
-  
-  val query = "synechococcus+elongatus+7942"
-  val urls = getPlatforms(query).map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a))
-  println("\n\n----------------------\nFTP URLS: ")
-
-  urls.foreach { url =>
-    val file = SOFTReader.download(url, new File("cache"))
-    var gzip: BufferedReader = null
-    try {
-      gzip = new BufferedReader(
-        new InputStreamReader(new GZIPInputStream(new FileInputStream(file))))
-      val matrix = SOFTReader.read(gzip, "7942_ID")
-    } catch {
-      case e:Throwable =>
-        printf("ERROR in processing - skipping file '%s'\n", file.getName)
-        e.printStackTrace
-    } finally {
-      if (gzip != null) gzip.close
-    }
-/*
-    printf("GENE\t%s\n", matrix.sampleNames.mkString("\t"))
-    for (row <- 0 until matrix.numRows) {
-      print(matrix.rowNames(row))
-      for (col <- 0 until matrix.numColumns) {
-        printf("\t%f", matrix.values(row)(col))
-      }
-      printf("\n")
-    }*/
-  }
-  //println(getSampleAccessions(query).map(a => GEOFTPURLBuilder.urlBySample(a)))
-  /*
-  val synonyms = new RSATSynonymReader(new BufferedReader(
-    new FileReader("/home/weiju/Projects/ISB/isb-dataformats/synf_feature_names.tab"))).synonyms
-    */
 }

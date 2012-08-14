@@ -19,30 +19,6 @@ case class DataMatrix(rowNames: Seq[String],
   def numColumns = sampleNames.length
 }
 
-// Helper object for building FTP URLs
-object GEOFTPURLBuilder {
-  val BaseURL = "ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA"
-  val GSMPattern = Pattern.compile("GSM\\d{3,}?")
-  def download {}
-
-  // Create an FTP url for a sample accession
-  def urlBySample(accession: String) = {
-    val matcher = GSMPattern.matcher(accession)
-    if (matcher.matches) {
-      val dir = accession.replaceFirst("\\d\\d\\d$", "nnn")
-      val filename = "%s.CEL.gz".format(accession)
-      List(BaseURL, "supplementary", "samples", dir, accession,
-           filename).mkString("/")
-    } else throw new IllegalArgumentException("accession '%s' does not match GSM format".format(accession))
-  }
-
-  def urlSOFTByPlatform(platform: String) = {
-    val gpl = "GPL" + platform
-    List(BaseURL, "SOFT", "by_platform", gpl,
-         gpl + "_family.soft.gz").mkString("/")
-  }
-}
-
 object SOFTReader {
   private def readPlatform(platformLine: String, in: BufferedReader,
                            geneColumnName: String): Platform = {
