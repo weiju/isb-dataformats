@@ -2,17 +2,14 @@ package org.systemsbiology.services.eutils
 
 import scala.xml._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
-import java.io.{BufferedReader, FileReader, InputStreamReader}
+import java.io.{BufferedReader, InputStreamReader}
 import java.util.regex.Pattern
-
-import org.systemsbiology.formats.microarray.soft._
-import org.systemsbiology.services.rsat._
 
 /*
  * A set of simple wrapper objects that take advantage of the
  * fact that Scala supports XML natively
  */
-// Database strings for GEO
+// Database string constants for GEO
 object GEO {
   val Profiles = "geoprofiles"
 
@@ -95,7 +92,6 @@ object EFetch {
 object GEOFTPURLBuilder {
   val BaseURL = "ftp://ftp.ncbi.nlm.nih.gov/pub/geo/DATA"
   val GSMPattern = Pattern.compile("GSM\\d{3,}?")
-  def download {}
 
   // Create an FTP url for a sample accession
   def urlBySample(accession: String) = {
@@ -110,7 +106,6 @@ object GEOFTPURLBuilder {
 
   def urlSOFTByPlatform(platform: String) = {
     val gpl = "GPL" + platform
-    List(BaseURL, "SOFT", "by_platform", gpl,
-         gpl + "_family.soft.gz").mkString("/")
+    List(BaseURL, "SOFT", "by_platform", gpl, gpl + "_family.soft.gz").mkString("/")
   }
 }
