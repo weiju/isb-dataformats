@@ -1,7 +1,7 @@
 package org.systemsbiology.formats.microarray.soft
 
 import java.io.{BufferedReader, File, FileReader, FileOutputStream}
-import scala.collection.mutable.{ArrayBuffer, HashMap}
+import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet}
 
 import java.util.regex.Pattern
 
@@ -20,6 +20,7 @@ case class DataMatrix(rowNames: Seq[String],
 }
 
 object SOFTReader {
+
   private def readPlatform(platformLine: String, in: BufferedReader,
                            geneColumnNames: Seq[String]): Platform = {
     val geneMap = new HashMap[String, String]
@@ -46,8 +47,6 @@ object SOFTReader {
       geneColIndex += 1
       continueLoop = geneCol < 0 && geneColIndex < geneColumnNames.length
     }
-    if (geneCol == -1) geneCol = header.indexOf("ORF") // default is ORF
-
 
     if (idCol == -1) {
       println("ERROR: could not find a ID column")
@@ -62,23 +61,28 @@ object SOFTReader {
 
     while (!line.startsWith("!platform_table_end")) {
       val comps = line.split("\t")
-      ids += comps(idCol)
-      geneMap(comps(idCol)) = comps(geneCol)
-      id2RowMap(comps(idCol)) = row
-
+      if (comps(geneCol) != "") {
+        ids += comps(idCol)
+        geneMap(comps(idCol)) = comps(geneCol)
+        id2RowMap(comps(idCol)) = row
+        row += 1
+      } else {
+        // skip the platform row for non-mappable genes
+        printf("WARN: platform: '%s' - id '%s' does not map to a gene -> ignoring\n",
+               platformName, comps(idCol))
+      }
       line = in.readLine
-      row += 1
     }
     Platform(platformName, ids, id2RowMap.toMap, geneMap.toMap)
   }
 
-  private def readSample(sampleLine: String, in: BufferedReader) = {
+  private def readSample(sampleLine: String, in: BufferedReader,
+                         platform: Platform) = {
     val sampleName = sampleLine.split("=")(1).trim
     val values = new ArrayBuffer[Measurement]
 
     var line = in.readLine
     while (!line.startsWith("!sample_table_begin")) line = in.readLine
-    //print("parsing sample table...")
     line = in.readLine // read the header
     val header = line.split("\t").toSeq
     val idRefCol = header.indexOf("ID_REF")
@@ -87,11 +91,15 @@ object SOFTReader {
     line = in.readLine
     while (!line.startsWith("!sample_table_end")) {
       val comps = line.split("\t")
-      values += Measurement(comps(idRefCol), comps(valueCol))
+      val idref = comps(idRefCol)
+      if (platform.id2RowMap.contains(idref)) {
+        values += Measurement(comps(idRefCol), comps(valueCol))
+      }
       line = in.readLine
     }
     SampleData(sampleName, values)
   }
+
   def read(in: BufferedReader, geneColumnNames: Seq[String]=List("ORF")) = {
     val platforms = new ArrayBuffer[Platform]
     val samples = new ArrayBuffer[SampleData]
@@ -101,8 +109,8 @@ object SOFTReader {
         val platform = readPlatform(line, in, geneColumnNames)
         if (platform != null) platforms += platform
       }
-      if (line.startsWith("^SAMPLE")) {
-        samples += readSample(line, in)
+      if (platforms.length > 0 && line.startsWith("^SAMPLE")) {
+        samples += readSample(line, in, platforms(0))
       }
       line = in.readLine
     }
@@ -122,14 +130,11 @@ object SOFTReader {
           }
         }
       }
-      platform.ids.foreach { id =>
-        if (platform.geneMap(id) == "") println("WARNING: MAPS TO NOTHING: " + id)
-      }
       DataMatrix(platform.ids.map{id => platform.geneMap(id) },
                  samples.map(_.name),
                  array)
     } else {
-      println("no valid platform")
+      println("WARN: no valid platform found")
       null
     }
   }

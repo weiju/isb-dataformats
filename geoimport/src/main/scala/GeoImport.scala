@@ -53,13 +53,14 @@ object GeoImport extends App {
       }
     }
     println("# MATRICES COLLECTED: " + matrices.length)
-/*
     val allGenes = new HashSet[String]
     val allConditions = new ArrayBuffer[String]
+/*
     matrices.foreach { matrix =>
       //allGenes ++= matrix.rowNames
       //allConditions ++= matrix.sampleNames
     }
+    */
     matrices(1).rowNames.foreach { row =>
       if (allGenes.contains(row)) {
         printf("GENE '%s' is ALREADY IN !!!!\n", row)
@@ -67,7 +68,6 @@ object GeoImport extends App {
       allGenes += row
     }
     printf("# genes: %d # conditions: %d\n", allGenes.size, allConditions.size)
-*/
 /*
     printf("GENE\t%s\n", matrix.sampleNames.mkString("\t"))
     for (row <- 0 until matrix.numRows) {
