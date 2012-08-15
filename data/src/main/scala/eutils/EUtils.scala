@@ -4,6 +4,7 @@ import scala.xml._
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import java.io.{BufferedReader, InputStreamReader}
 import java.util.regex.Pattern
+import java.util.logging._
 
 /*
  * A set of simple wrapper objects that take advantage of the
@@ -30,18 +31,20 @@ object EInfo {
 
 // Wrapper for the esearch service
 object ESearch {
+  val Log = Logger.getLogger("ESearch")
   val BaseURL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
   def get(db: String, query: String, retmax: Int=1000) = {
     val url = new java.net.URL(
       BaseURL +
       "?db=%s&term=%s&retmax=%d&usehistory=y".format(db, query, retmax))
-    println("URL: " + url)
+    Log.info("URL: " + url)
     XML.load(url)
   }
 }
 
 // Wrapper for the esummary service
 object ESummary {
+  val Log = Logger.getLogger("ESummary")
   val BaseURL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
   def get(db: String, ids: Seq[String]) = {
     XML.load(new java.net.URL(
@@ -50,7 +53,7 @@ object ESummary {
   def getFromPreviousSearch(db: String, webEnv: String, queryKey: String) = {
     val url = new java.net.URL(
       BaseURL + "?db=%s&WebEnv=%s&query_key=%s".format(db, webEnv, queryKey))
-    println("URL: " + url)
+    Log.info("URL: " + url)
     XML.load(url)
   }
 }
@@ -68,13 +71,15 @@ object ELink {
 
 // Wrapper for the efetch service
 object EFetch {
+  val Log = Logger.getLogger("EFetch")
+
   val BaseURL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
   def get(db: String, ids: Seq[String], webEnv: String,
             queryKey: String) = {
     val url = new java.net.URL(
       BaseURL + "?db=%s&ids=%s&WebEnv=%s&query_key=%s".format(
         db, ids.mkString(","), webEnv, queryKey))
-    println("Fetching " + url)
+    Log.info("Fetching " + url)
     val in = new BufferedReader(new InputStreamReader(url.openStream))
     val buffer = new StringBuilder
     var line = in.readLine

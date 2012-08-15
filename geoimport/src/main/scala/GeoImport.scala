@@ -2,6 +2,8 @@ package org.systemsbiology.geoimport
 
 import java.io.{File, BufferedReader, InputStreamReader, FileInputStream, FileReader}
 import java.util.zip._
+import java.util.logging._
+
 import scala.collection.mutable.{ArrayBuffer, HashSet}
 
 import org.systemsbiology.services.eutils._
@@ -11,6 +13,8 @@ import org.systemsbiology.formats.microarray.soft._
 case class ImportConfig(query: String, idColumns: Seq[String])
 
 object GeoImport extends App {
+  val Log = Logger.getLogger("GeoImport")
+
   def getSummaries(query: String) = {
     val searchresult = ESearch.get(GEO.DataSets, query)
     val webEnv = (searchresult \ "WebEnv").text
@@ -46,13 +50,13 @@ object GeoImport extends App {
         if (matrix != null) matrices += matrix
       } catch {
         case e:Throwable =>
-          printf("ERROR in processing - skipping file '%s'\n", file.getName)
-        e.printStackTrace
+          Log.log(Level.SEVERE,
+                  "error in processing - skipping file '%s'".format(file.getName), e)
       } finally {
         if (gzip != null) gzip.close
       }
     }
-    println("# MATRICES COLLECTED: " + matrices.length)
+    Log.info("# matrices collected: %d".format(matrices.length))
     val allGenes = new HashSet[String]
     val allConditions = new ArrayBuffer[String]
 /*
@@ -61,13 +65,13 @@ object GeoImport extends App {
       //allConditions ++= matrix.sampleNames
     }
     */
-    matrices(1).rowNames.foreach { row =>
+    matrices(0).rowNames.foreach { row =>
       if (allGenes.contains(row)) {
-        printf("GENE '%s' is ALREADY IN !!!!\n", row)
+        Log.warning("GENE '%s' is ALREADY IN !!!!".format(row))
       }
       allGenes += row
     }
-    printf("# genes: %d # conditions: %d\n", allGenes.size, allConditions.size)
+    Log.info("# genes: %d # conditions: %d\n".format(allGenes.size, allConditions.size))
 /*
     printf("GENE\t%s\n", matrix.sampleNames.mkString("\t"))
     for (row <- 0 until matrix.numRows) {

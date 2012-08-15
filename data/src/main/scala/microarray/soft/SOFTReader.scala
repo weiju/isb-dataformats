@@ -4,6 +4,7 @@ import java.io.{BufferedReader, File, FileReader, FileOutputStream}
 import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet}
 
 import java.util.regex.Pattern
+import java.util.logging._
 
 import org.apache.commons.net.ftp._
 
@@ -20,6 +21,7 @@ case class DataMatrix(rowNames: Seq[String],
 }
 
 object SOFTReader {
+  val Log = Logger.getLogger("SOFTReader")
 
   private def readPlatform(platformLine: String, in: BufferedReader,
                            geneColumnNames: Seq[String]): Platform = {
@@ -49,11 +51,11 @@ object SOFTReader {
     }
 
     if (idCol == -1) {
-      println("ERROR: could not find a ID column")
+      Log.severe("could not find a ID column")
       return null
     }
     if (geneCol == -1) {
-      println("ERROR: could not find a gene column")
+      Log.severe("could not find a gene column")
       return null
     }
 
@@ -68,8 +70,8 @@ object SOFTReader {
         row += 1
       } else {
         // skip the platform row for non-mappable genes
-        printf("WARN: platform: '%s' - id '%s' does not map to a gene -> ignoring\n",
-               platformName, comps(idCol))
+        Log.warning("platform: '%s' - id '%s' does not map to a gene -> ignoring".format(
+          platformName, comps(idCol)))
       }
       line = in.readLine
     }
@@ -116,8 +118,8 @@ object SOFTReader {
     }
     if (platforms.length > 0) {
       val platform = platforms(0)
-      printf("Merging platform '%s' into an array of %dx%d\n",
-             platform.name, platform.ids.length, samples.length)
+      Log.info("Merging platform '%s' into an array of %dx%d".format(
+             platform.name, platform.ids.length, samples.length))
       val array = Array.ofDim[Double](platform.ids.length,
                                       samples.length)
       for (col <- 0 until samples.length) {
@@ -134,7 +136,7 @@ object SOFTReader {
                  samples.map(_.name),
                  array)
     } else {
-      println("WARN: no valid platform found")
+      Log.warning("no valid platform found")
       null
     }
   }
@@ -147,10 +149,10 @@ object SOFTReader {
     val cacheFile = new File(cacheDir, filename)
 
     if (cacheFile.exists) {
-      printf("File '%s' was already downloaded.\n", filename)
+      Log.info("File '%s' was already downloaded.".format(filename))
       cacheFile
     } else {
-      printf("downloading '%s' (%s) from server '%s'...", path, filename, server)
+      Log.info("downloading '%s' (%s) from server '%s'...".format(path, filename, server))
       var ftp: FTPClient = null
       try {
         ftp = new FTPClient
@@ -165,10 +167,10 @@ object SOFTReader {
             ftp.noop
             ftp.logout
           } else {
-            println("ERROR: could not login")
+            Log.severe("could not login")
           }
         }
-        println("done.")
+        Log.info("done.")
         cacheFile
       } finally {
         if (ftp != null && ftp.isConnected) ftp.disconnect
