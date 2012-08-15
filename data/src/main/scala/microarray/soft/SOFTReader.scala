@@ -1,6 +1,6 @@
 package org.systemsbiology.formats.microarray.soft
 
-import java.io.{BufferedReader, File, FileReader, FileOutputStream}
+import java.io.{BufferedReader, File, FileReader, FileOutputStream, PrintWriter}
 import scala.collection.mutable.{ArrayBuffer, HashMap, HashSet}
 
 import java.util.regex.Pattern
@@ -18,6 +18,16 @@ case class DataMatrix(rowNames: Seq[String],
                       values: Array[Array[Double]]) {
   def numRows = rowNames.length
   def numColumns = sampleNames.length
+  def write(out: PrintWriter) {
+    out.printf("GENE\t%s\n", sampleNames.mkString("\t"))
+    for (row <- 0 until numRows) {
+      out.print(rowNames(row))
+      for (col <- 0 until numColumns) {
+        out.print("\t%f".format(values(row)(col)))
+      }
+      out.print("\n")
+    }
+  }
 }
 
 object SOFTReader {

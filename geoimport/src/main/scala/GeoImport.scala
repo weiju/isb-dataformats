@@ -1,21 +1,22 @@
 package org.systemsbiology.geoimport
 
-import java.io.{File, BufferedReader, InputStreamReader, FileInputStream, FileReader}
+import java.io.{File, BufferedReader, InputStreamReader, FileInputStream, FileReader,
+                BufferedWriter, FileWriter, PrintWriter}
 import java.util.zip._
 import java.util.logging._
 
-import scala.collection.mutable.{ArrayBuffer, HashSet}
+import scala.collection.mutable.{ArrayBuffer, HashSet, HashMap}
 
 import org.systemsbiology.services.eutils._
 import org.systemsbiology.services.rsat._
 import org.systemsbiology.formats.microarray.soft._
 
-case class ImportConfig(query: String, idColumns: Seq[String])
+case class ImportConfig(name: String, query: String, idColumns: Seq[String])
 
 object GeoImport extends App {
   val Log = Logger.getLogger("GeoImport")
 
-  def getSummaries(query: String) = {
+  private def getSummaries(query: String) = {
     val searchresult = ESearch.get(GEO.DataSets, query)
     val webEnv = (searchresult \ "WebEnv").text
     val queryKey = (searchresult \ "QueryKey").text
@@ -27,7 +28,7 @@ object GeoImport extends App {
    * Returns the unique platform identifiers available for this
    * organism.
    */
-  def getPlatforms(organism: String) = {
+  private def getPlatforms(organism: String) = {
     val query = "%s".format(organism)
     val summary = getSummaries(organism)
     (summary \\ "Item").filter {
@@ -35,7 +36,51 @@ object GeoImport extends App {
     }.map { item => item.text.split(";") }.flatten.toSet.toSeq
   }
 
-  def mergeOrganism(config: ImportConfig) {
+  private def mergeMatrices(matrices: Seq[DataMatrix]) = {
+    Log.info("# matrices collected: %d".format(matrices.length))
+    val allGenes = new HashSet[String]
+    val allConditions = new ArrayBuffer[String]
+    val gene2RowMaps = new ArrayBuffer[Map[String, Int]]
+
+    matrices.foreach { matrix =>
+      val gene2Row = new HashMap[String, Int]
+      allGenes ++= matrix.rowNames
+      allConditions ++= matrix.sampleNames
+      matrix.rowNames.foreach { row =>
+        if (gene2Row.contains(row)) {
+          Log.warning("gene '%s' is redundant -> only one row will be used".format(row))
+        }
+        gene2Row(row) = matrix.rowNames.indexOf(row)
+      }
+      gene2RowMaps += gene2Row.toMap
+    }
+
+    Log.info("# genes: %d # conditions: %d\n".format(allGenes.size, allConditions.size))
+    val sortedGenes = allGenes.toSeq.sortWith((s1, s2) => s1 < s2)
+    val mergedValues = Array.ofDim[Double](sortedGenes.length, allConditions.length)
+
+    var colOffset = 0
+    for (i <- 0 until matrices.length) {
+      val matrix = matrices(i)
+      val gene2RowMap = gene2RowMaps(i)
+      for (j <- 0 until sortedGenes.length) {
+        if (gene2RowMap.contains(sortedGenes(j))) {
+          val sourceRow = gene2RowMap(sortedGenes(j))
+          for (k <- 0 until matrix.sampleNames.length) {
+            mergedValues(j)(colOffset + k) = matrix.values(sourceRow)(k)
+          }
+        } else {
+          for (k <- 0 until matrix.sampleNames.length) {
+            mergedValues(j)(colOffset + k) = java.lang.Double.NaN
+          }
+        }
+      }
+      colOffset += matrix.sampleNames.length
+    }
+    DataMatrix(sortedGenes, allConditions, mergedValues)
+  }
+
+  def mergeOrganism(config: ImportConfig) = {
     val urls = getPlatforms(config.query).map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a))
     val matrices = new ArrayBuffer[DataMatrix]
     val synonyms = new RSATSynonymReader(new BufferedReader(
@@ -56,32 +101,15 @@ object GeoImport extends App {
         if (gzip != null) gzip.close
       }
     }
-    Log.info("# matrices collected: %d".format(matrices.length))
-    val allGenes = new HashSet[String]
-    val allConditions = new ArrayBuffer[String]
-/*
-    matrices.foreach { matrix =>
-      //allGenes ++= matrix.rowNames
-      //allConditions ++= matrix.sampleNames
-    }
-    */
-    matrices(0).rowNames.foreach { row =>
-      if (allGenes.contains(row)) {
-        Log.warning("GENE '%s' is ALREADY IN !!!!".format(row))
-      }
-      allGenes += row
-    }
-    Log.info("# genes: %d # conditions: %d\n".format(allGenes.size, allConditions.size))
-/*
-    printf("GENE\t%s\n", matrix.sampleNames.mkString("\t"))
-    for (row <- 0 until matrix.numRows) {
-      print(matrix.rowNames(row))
-      for (col <- 0 until matrix.numColumns) {
-        printf("\t%f", matrix.values(row)(col))
-      }
-      printf("\n")
-    }*/
+    var out : PrintWriter = null
+    try {
+      out = new PrintWriter(new BufferedWriter(new FileWriter("%s_merged.csv".format(config.name))))
+      val resultMatrix = mergeMatrices(matrices)
+      resultMatrix.write(out)
+    } finally {      
+      if (out == null) out.close
+    } 
   }
-  val configs = List(ImportConfig("synechococcus+elongatus+7942", List("7942_ID", "ORF")))
+  val configs = List(ImportConfig("synf", "synechococcus+elongatus+7942", List("7942_ID", "ORF")))
   configs.foreach { config => mergeOrganism(config) }
 }
