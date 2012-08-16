@@ -25,5 +25,6 @@ object IsbDataFormats extends Build {
   def testDependencies = libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "1.9-2.10.0-M6-B2" % "test",
     "junit" % "junit" % "4.10" % "test",
-    "commons-net" % "commons-net" % "3.1")
+    "commons-net" % "commons-net" % "3.1",
+    "com.typesafe" % "slick_2.10.0-M6" % "0.11.0")
 }

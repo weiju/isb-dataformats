@@ -6,15 +6,35 @@ import java.util.zip._
 import java.util.logging._
 
 import scala.collection.mutable.{ArrayBuffer, HashSet, HashMap}
+import scala.slick.driver.MySQLDriver.simple._
+import Database.threadLocalSession
 
 import org.systemsbiology.services.eutils._
 import org.systemsbiology.services.rsat._
 import org.systemsbiology.formats.microarray.soft._
 
+object ImportConfigs extends Table[(Long, String, String)]("import_configs") {
+  def id = column[Long]("id", O.PrimaryKey,  O.AutoInc, O.NotNull)
+  def name = column[String]("name", O.NotNull)
+  def query = column[String]("query", O.NotNull)
+  
+  def * = id ~ name ~ query
+}
+
+object IdColumns extends Table[(Long, Long, String, Int)]("id_columns") {
+  def id = column[Long]("id", O.PrimaryKey,  O.AutoInc, O.NotNull)
+  def configId = column[Long]("import_config_id", O.NotNull)
+  def name = column[String]("name", O.NotNull)
+  def rank = column[Int]("rank", O.NotNull)
+
+  def * = id ~ configId ~ name ~ rank
+}
+
 case class ImportConfig(name: String, query: String, idColumns: Seq[String])
 
 object GeoImport extends App {
   val Log = Logger.getLogger("GeoImport")
+  val DatabaseURL = "jdbc:mysql://localhost/geoimport?user=root&password=root&useUnicode=true&characterEncoding=utf8"
 
   private def getSummaries(query: String) = {
     val searchresult = ESearch.get(GEO.DataSets, query)
@@ -83,8 +103,8 @@ object GeoImport extends App {
   def mergeOrganism(config: ImportConfig) = {
     val urls = getPlatforms(config.query).map(a => GEOFTPURLBuilder.urlSOFTByPlatform(a))
     val matrices = new ArrayBuffer[DataMatrix]
-    val synonyms = new RSATSynonymReader(new BufferedReader(
-      new FileReader("/home/weiju/Projects/ISB/isb-dataformats/synf_feature_names.tab"))).synonyms
+    //val synonyms = new RSATSynonymReader(new BufferedReader(
+    //  new FileReader("/home/weiju/Projects/ISB/isb-dataformats/synf_feature_names.tab"))).synonyms
     urls.foreach { url =>
       val file = SOFTReader.download(url, new File("cache"))
       var gzip: BufferedReader = null
@@ -110,6 +130,15 @@ object GeoImport extends App {
       if (out == null) out.close
     } 
   }
-  val configs = List(ImportConfig("synf", "synechococcus+elongatus+7942", List("7942_ID", "ORF")))
-  configs.foreach { config => mergeOrganism(config) }
+  Database.forURL(DatabaseURL, driver="com.mysql.jdbc.Driver") withSession {
+    val configs = new ArrayBuffer[ImportConfig]
+    Query(ImportConfigs) foreach {
+      case (id, name, query) =>
+        val idcols = (for {
+          idcol <- IdColumns
+        } yield idcol.rank ~ idcol.name).sortBy(_._1).map(_._2).to[List]
+        configs += ImportConfig(name, query, idcols)
+    }
+    configs.foreach { config => mergeOrganism(config) }
+  }
 }
