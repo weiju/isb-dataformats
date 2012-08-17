@@ -57,7 +57,7 @@ object GeoImportQueries {
     Query(ImportConfigs) foreach {
       case (id, name, query) =>
         val idcols = (for {
-          idcol <- IdColumns
+          idcol <- IdColumns if idcol.configId === id
           _ <- Query orderBy idcol.rank
         } yield idcol.name).list
       configs += ImportConfig(id, name, query, idcols)
