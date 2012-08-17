@@ -10,8 +10,10 @@ object IsbDataFormats extends Build {
   def buildSettings = Seq(
     organization := "org.systemsbiology",
     version := "1.0",
-    scalaVersion := "2.10.0-M6",
-    scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+    //scalaVersion := "2.10.0-M6",
+    scalaVersion := "2.9.2",
+    //scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+    scalacOptions ++= Seq("-deprecation", "-unchecked"),
     javacOptions in Compile ++= Seq("-target", "6", "-source", "6")
   )
 
@@ -23,8 +25,11 @@ object IsbDataFormats extends Build {
   lazy val data = Project("data", file("data")) settings(testDependencies :_*)
 
   def testDependencies = libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "1.9-2.10.0-M6-B2" % "test",
+    //"org.scalatest" %% "scalatest" % "1.9-2.10.0-M6-B2" % "test",
+    "org.scalatest" %% "scalatest" % "1.8" % "test",
     "junit" % "junit" % "4.10" % "test",
     "commons-net" % "commons-net" % "3.1",
-    "com.typesafe" % "slick_2.10.0-M6" % "0.11.0")
+    "org.scalaquery" % "scalaquery_2.9.1" % "0.10.0-M1"
+    //"com.typesafe" % "slick_2.10.0-M6" % "0.11.0"
+  )
 }

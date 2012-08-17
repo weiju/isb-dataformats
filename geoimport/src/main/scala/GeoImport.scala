@@ -6,8 +6,14 @@ import java.util.zip._
 import java.util.logging._
 
 import scala.collection.mutable.{ArrayBuffer, HashSet, HashMap}
-import scala.slick.driver.MySQLDriver.simple._
-import Database.threadLocalSession
+//import scala.slick.driver.MySQLDriver.simple._
+//import Database.threadLocalSession
+import org.scalaquery.ql._
+import org.scalaquery.ql.TypeMapper._
+import org.scalaquery.ql.extended.{ExtendedTable => Table}
+import org.scalaquery.ql.extended.MySQLDriver.Implicit._
+import org.scalaquery.session.{Database, Session}
+
 
 import org.systemsbiology.services.eutils._
 import org.systemsbiology.services.rsat._
@@ -30,7 +36,7 @@ object IdColumns extends Table[(Long, Long, String, Int)]("id_columns") {
   def * = id ~ configId ~ name ~ rank
 }
 
-case class ImportConfig(name: String, query: String, idColumns: Seq[String])
+case class ImportConfig(id: Long, name: String, query: String, idColumns: Seq[String])
 
 object GeoImport extends App {
   val Log = Logger.getLogger("GeoImport")
@@ -130,14 +136,24 @@ object GeoImport extends App {
       if (out == null) out.close
     } 
   }
-  Database.forURL(DatabaseURL, driver="com.mysql.jdbc.Driver") withSession {
+  Database.forURL(DatabaseURL, driver="com.mysql.jdbc.Driver") withSession { implicit db: Session =>
     val configs = new ArrayBuffer[ImportConfig]
+    /*
     Query(ImportConfigs) foreach {
       case (id, name, query) =>
         val idcols = (for {
           idcol <- IdColumns
         } yield idcol.rank ~ idcol.name).sortBy(_._1).map(_._2).to[List]
         configs += ImportConfig(name, query, idcols)
+    }
+    */
+    Query(ImportConfigs) foreach {
+      case (id, name, query) =>
+        val idcols = (for {
+          idcol <- IdColumns
+          _ <- Query orderBy idcol.rank
+        } yield idcol.name).list
+        configs += ImportConfig(id, name, query, idcols)
     }
     configs.foreach { config => mergeOrganism(config) }
   }
