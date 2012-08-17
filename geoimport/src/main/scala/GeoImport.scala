@@ -38,6 +38,34 @@ object IdColumns extends Table[(Long, Long, String, Int)]("id_columns") {
 
 case class ImportConfig(id: Long, name: String, query: String, idColumns: Seq[String])
 
+object GeoImportQueries {
+
+  def allConfigs(implicit db: Session) = {
+    val configs = new ArrayBuffer[ImportConfig]
+
+    // The code below work with Slick 0.11.
+    // The only difference is the way ordering is specified,
+    // ScalaQuery's orderBy method currently used will be deprecated in Slick
+
+    // Query(ImportConfigs) foreach {
+    //   case (id, name, query) =>
+    //     val idcols = (for {
+    //       idcol <- IdColumns
+    //     } yield idcol.rank ~ idcol.name).sortBy(_._1).map(_._2).to[List]
+    //   configs += ImportConfig(name, query, idcols)
+    // }
+    Query(ImportConfigs) foreach {
+      case (id, name, query) =>
+        val idcols = (for {
+          idcol <- IdColumns
+          _ <- Query orderBy idcol.rank
+        } yield idcol.name).list
+      configs += ImportConfig(id, name, query, idcols)
+    }
+    configs
+  }
+}
+
 object GeoImport extends App {
   val Log = Logger.getLogger("GeoImport")
   val DatabaseURL = "jdbc:mysql://localhost/geoimport?user=root&password=root&useUnicode=true&characterEncoding=utf8"
@@ -137,24 +165,7 @@ object GeoImport extends App {
     } 
   }
   Database.forURL(DatabaseURL, driver="com.mysql.jdbc.Driver") withSession { implicit db: Session =>
-    val configs = new ArrayBuffer[ImportConfig]
-    /*
-    Query(ImportConfigs) foreach {
-      case (id, name, query) =>
-        val idcols = (for {
-          idcol <- IdColumns
-        } yield idcol.rank ~ idcol.name).sortBy(_._1).map(_._2).to[List]
-        configs += ImportConfig(name, query, idcols)
-    }
-    */
-    Query(ImportConfigs) foreach {
-      case (id, name, query) =>
-        val idcols = (for {
-          idcol <- IdColumns
-          _ <- Query orderBy idcol.rank
-        } yield idcol.name).list
-        configs += ImportConfig(id, name, query, idcols)
-    }
+    val configs = GeoImportQueries.allConfigs
     configs.foreach { config => mergeOrganism(config) }
   }
 }
