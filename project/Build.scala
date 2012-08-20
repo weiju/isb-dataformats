@@ -19,17 +19,13 @@ object IsbDataFormats extends Build {
 
   def appSettings = assemblySettings ++ testDependencies
 
-  lazy val root = Project("root", file(".")) aggregate(geoimport)
-  lazy val geoimport = Project("geoimport",
-                                file("geoimport")) settings (appSettings: _*) dependsOn(data)
+  lazy val root = Project("root", file(".")) aggregate(data)
   lazy val data = Project("data", file("data")) settings(testDependencies :_*)
 
   def testDependencies = libraryDependencies ++= Seq(
     //"org.scalatest" %% "scalatest" % "1.9-2.10.0-M6-B2" % "test",
     "org.scalatest" %% "scalatest" % "1.8" % "test",
     "junit" % "junit" % "4.10" % "test",
-    "commons-net" % "commons-net" % "3.1",
-    "org.scalaquery" % "scalaquery_2.9.1" % "0.10.0-M1"
-    //"com.typesafe" % "slick_2.10.0-M6" % "0.11.0"
+    "commons-net" % "commons-net" % "3.1"
   )
 }
