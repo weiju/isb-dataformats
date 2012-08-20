@@ -10,11 +10,9 @@ Currently, the library reads microarray data (gene expressions).
 
 * SBEAMS
 * legacy ISB XML
-* GEO SOFT
 * RSAT feature names
 
 ### Supported web services:
 
-* GEO
 * RSAT
 
